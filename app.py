@@ -1,5 +1,6 @@
 from flask import Flask
 
+import os
 from modules import db
 from modules.administrators import Administrators
 from modules.airline_companies import AirlineCompanies
@@ -22,19 +23,24 @@ routes_blueprint = Routes('routes', __name__)
 # Register Blueprints
 app.register_blueprint(routes_blueprint)
 
+# Configure the database URI using environment variables
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', app.config['SQLALCHEMY_DATABASE_URI'])
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 if __name__ == "__main__":
     
-    with app.app_context():
-        admins=Administrators()
-        airlines=AirlineCompanies()
-        countries=Countries()
-        customers=Customers()
-        flights=Flights()
-        tickets=Tickets()
-        user_roles=UserRoles()
-        users=Users()
+    # If running in Docker, initialize the database
+    if os.environ.get('DOCKER_CONTAINER'):
+        with app.app_context():
+            admins=Administrators()
+            airlines=AirlineCompanies()
+            countries=Countries()
+            customers=Customers()
+            flights=Flights()
+            tickets=Tickets()
+            user_roles=UserRoles()
+            users=Users()
+            
+            db.create_all()
         
-        db.create_all()
-        
-    app.run(debug=app.config['DEBUG'], use_reloader=False)
+    app.run(debug=app.config['DEBUG'], use_reloader=False, port=3000)

@@ -1,0 +1,25 @@
+version: '3'
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=mssql+pyodbc://@DESKTOP-0RDL76B/FlightsProject?driver=ODBC+Driver+17+for+SQL+Server
+      - DOCKER_CONTAINER=True
+    depends_on:
+      - db
+  db:
+    image: "mcr.microsoft.com/mssql/server"
+    environment:
+      SA_PASSWORD: "YourPassword123"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer" 
+    ports:
+      - "3000:3000"
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge
